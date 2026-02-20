@@ -17,13 +17,17 @@ PispiQrImage(
 
 final svg = await PispiQrGenerator.svg(payload);
 */
-library;
 
-/// Exporte la façade pour la génération et le décodage des payloads QR.
-export 'modules/pispi_qr_payload.dart';
+// Models
+export 'models/pispi_qr_contant.dart';
+export 'models/pispi_qr_country.dart';
+export 'models/pispi_qr_exceptions.dart';
+export 'models/pispi_qr_payload_decode.dart';
+export 'models/pispi_qr_payload_input.dart';
+export 'models/pispi_qr_type.dart';
+export 'models/pispi_qr_user.dart';
 
-/// Exporte le widget Flutter pour afficher un QR code avec options de personnalisation.
-export 'modules/pispi_qr_image.dart';
-
-/// Exporte le générateur SVG interne du QR code avec gestion du logo PI-SPI.
+// Modules
 export 'modules/pispi_qr_generator.dart';
+export 'modules/pispi_qr_image.dart';
+export 'modules/pispi_qr_payload.dart';

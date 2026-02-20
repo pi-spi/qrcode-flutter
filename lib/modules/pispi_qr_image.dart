@@ -1,9 +1,3 @@
-/// Widget PI-SPI QR Image
-///
-/// Fournit un widget QR code personnalisable avec
-/// un label optionnel et le logo PI-SPI intégré.
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'pispi_qr_generator.dart';

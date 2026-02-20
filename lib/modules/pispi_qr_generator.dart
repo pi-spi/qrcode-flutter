@@ -1,3 +1,12 @@
+
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
+import 'package:qr/qr.dart';
+
+import '../models/pispi_qr_contant.dart';
+
 /// PI-SPI QR SVG Generator
 ///
 /// Générateur SVG vectoriel conforme EMVCo pour les QR Codes PI-SPI.
@@ -13,20 +22,7 @@
 ///
 /// ⚠️ La méthode principale est asynchrone car elle charge
 /// dynamiquement l’asset du logo via `rootBundle`.
-library;
 
-import 'dart:convert';
-
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/material.dart';
-import 'package:qr/qr.dart';
-
-import '../models/pispi_qr_contant.dart';
-
-/// Générateur SVG pour QR Code PI-SPI.
-///
-/// Classe statique non instanciable.
-/// Toutes les méthodes sont accessibles via appel statique.
 class PispiQrGenerator {
 
   /// Constructeur privé empêchant l’instanciation.

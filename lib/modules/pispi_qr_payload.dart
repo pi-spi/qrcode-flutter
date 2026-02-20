@@ -1,18 +1,3 @@
-/// SDK PI-SPI QR Code
-///
-/// Point d'entrée principal pour :
-/// - Créer des payloads PI-SPI QR conformes EMV
-/// - Décoder des payloads QR
-/// - Valider des alias
-/// - Calculer des checksums CRC16
-library;
-
-export '../models/pispi_qr_payload_input.dart';
-export '../models/pispi_qr_payload_decode.dart';
-export '../models/pispi_qr_country.dart';
-export '../models/pispi_qr_type.dart';
-export '../models/pispi_qr_user.dart';
-export '../models/pispi_qr_exceptions.dart';
 
 import '../models/pispi_qr_payload_decode.dart';
 import '../models/pispi_qr_payload_input.dart';
