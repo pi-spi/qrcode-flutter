@@ -3,7 +3,7 @@ description: "Flutter SDK pour générer et décoder des QR Codes PI-SPI conform
 version: 1.0.0
 homepage: "https://github.com/pi-spi/qrcode-flutter.git"
 repository: "https://github.com/pi-spi/qrcode-flutter.git"
-publish_to: none
+# publish_to: none
 
 environment:
   sdk: ^3.10.0
