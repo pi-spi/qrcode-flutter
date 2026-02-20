@@ -138,4 +138,4 @@ Pour toute question, problème ou contribution :
 
 Email : support@bceao.int
 
-GitHub : []
+GitHub : [https://github.com/pi-spi/qrcode-flutter.git]
