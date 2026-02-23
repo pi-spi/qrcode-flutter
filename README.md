@@ -86,15 +86,21 @@ print(result.transactionAmount);
     PispiQrImage(
         payload: payload,
         qrImageOptions: QrImageOptions(
-            piIconSize: 60,
-            dataColor: Colors.black,
-            eyeColor: Colors.black,
-            label: QrImageOptionsLabel(
-            text: "ACME Corp.",
-            textStyle: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            qrSize: 220,
+            margin: 12,
+            icon: QrImageOptionsIcon(
+                size: 40,
             ),
+            eye: QrImageOptionsEye(
+                color: Colors.black,
+                shape: QrEyeShape.square,
+            ),
+            data: QrImageOptionsData(
+                color: Colors.black,
+                shape: QrDataShape.circle,
+            ),
+            label: QrImageOptionsLabel( 
+                text: "Nom ",
             ),
         ),
     );

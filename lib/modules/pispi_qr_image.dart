@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'pispi_qr_generator.dart';
+import '../models/pispi_qr_const.dart';
+import 'paint/qr_image.dart';
+import 'paint/types.dart';
 
 /// Options de configuration pour [PispiQrImage].
 class QrImageOptions {
 
-  /// Taille de l'icône PI-SPI intégrée au centre du QR.
-  final double piIconSize;
+  final QrImageOptionsIcon? icon;
 
   /// Taille personnalisée du QR. Si null, le QR sera responsive.
   final double? qrSize;
-
-  /// Couleur de fond du QR code.
-  final Color backgroundColor;
 
   /// Marge autour du QR.
   final double margin;
@@ -21,20 +18,19 @@ class QrImageOptions {
   final QrImageOptionsLabel? label;
 
   /// Couleur des modules de données du QR.
-  final Color dataColor;
+  final QrImageOptionsData? data;
 
   /// Couleur des "yeux" du QR (finder patterns).
-  final Color eyeColor;
+  final QrImageOptionsEye? eye;
 
   /// Crée une instance de configuration pour [PispiQrImage].
   const QrImageOptions({
     this.label,
-    this.backgroundColor = Colors.white,
     this.margin = 10,
     this.qrSize,
-    this.piIconSize = 60,
-    this.dataColor = Colors.black,
-    this.eyeColor = Colors.black,
+    this.icon,
+    this.data,
+    this.eye,
   });
 }
 
@@ -54,17 +50,66 @@ class QrImageOptionsLabel {
   });
 }
 
-/// Widget qui affiche un QR code PI-SPI à partir d’une payload.
+/// L'icône PI-SPI intégrée au centre du QR.
+class QrImageOptionsIcon {
+
+  final ImageProvider<Object>? image;
+
+  final double size;
+
+  /// Crée un label pour le QR code.
+  const QrImageOptionsIcon({
+    this.image,
+    this.size = 60,
+  });
+}
+
+/// Widget qui affiche un QR code PI-SPI conforme EMV à partir d’une payload.
+///
+/// Ce widget repose sur [QrImageView] pour le rendu du QR code et
+/// permet une personnalisation complète via [QrImageOptions].
+///
+/// Fonctionnalités :
+/// - Taille responsive (ou personnalisée via `qrSize`)
+/// - Icône centrale optionnelle (logo PI-SPI par défaut)
+/// - Personnalisation des modules de données (forme, couleur)
+/// - Personnalisation des "yeux" du QR (finder patterns)
+/// - Marge configurable (quiet zone)
+/// - Label optionnel affiché sous le QR
+/// - Gestion des états : loader, erreur, vide
 ///
 /// Exemple d’utilisation :
+///
 /// ```dart
 /// PispiQrImage(
 ///   payload: payload,
 ///   qrImageOptions: QrImageOptions(
-///     label: QrImageOptionsLabel(text: "Nom du marchand"),
+///     qrSize: 220,
+///     margin: 12,
+///     icon: QrImageOptionsIcon(
+///       size: 40,
+///     ),
+///     eye: QrImageOptionsEye(
+///       color: Colors.black,
+///       shape: QrEyeShape.square,
+///     ),
+///     data: QrImageOptionsData(
+///       color: Colors.black,
+///       shape: QrDataShape.circle,
+///     ),
+///     label: QrImageOptionsLabel(
+///       text: "Nom du marchand",
+///     ),
 ///   ),
 /// )
 /// ```
+///
+/// ⚠️ Recommandations :
+/// - Éviter une icône centrale > 20% de la taille totale du QR
+/// - Conserver une marge suffisante pour assurer une bonne lisibilité
+/// - Toujours fournir une payload valide conforme EMV
+///
+/// Compatible mobile et tablette.
 class PispiQrImage extends StatelessWidget {
 
   /// Payload QR conforme EMV.
@@ -104,61 +149,59 @@ class PispiQrImage extends StatelessWidget {
     final double defaultSize =
         (width / 12) * (isTablet ? 6 : 10);
 
-    // FutureBuilder pour générer le SVG du QR code de manière asynchrone
-    return FutureBuilder<String>(
-      future: PispiQrGenerator.svg(
-        payload,
-        size: qrImageOptions.qrSize ?? defaultSize,
-        backgroundColor: qrImageOptions.backgroundColor,
-        dataColor: qrImageOptions.dataColor,
-        eyeColor: qrImageOptions.eyeColor,
-        piIconSize: qrImageOptions.piIconSize,
-        margin: qrImageOptions.margin
+    final size = qrImageOptions.qrSize ?? defaultSize;
+
+    return SizedBox(
+      width: size,
+      child: Center(
+        child: qrImageOptions.label == null
+          ? _buildQr(context, payload, size)
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildQr(context, payload, size),
+                const SizedBox(height: 8),
+                Text(
+                  qrImageOptions.label!.text,
+                  textAlign: TextAlign.center,
+                  style: qrImageOptions.label!.textStyle ??
+                      const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+        ),
       ),
-      builder: (context, snapshot) {
-        // Affichage pendant le chargement
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return loader ?? const CircularProgressIndicator();
-        }
-
-        // Affichage en cas d'erreur
-        if (snapshot.hasError) {
-          return error ?? Text('Erreur: ${snapshot.error}');
-        }
-
-        // Affichage si aucune donnée
-        if (!snapshot.hasData) {
-          return empty ?? const Text('Aucune donnée');
-        }
-
-        // Affichage du QR code avec ou sans label
-        return Center(
-          child: qrImageOptions.label == null
-            ? _buildQr(context, snapshot.data!)
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildQr(context, snapshot.data!),
-                  const SizedBox(height: 8),
-                  Text(
-                    qrImageOptions.label!.text,
-                    textAlign: TextAlign.center,
-                    style: qrImageOptions.label!.textStyle ??
-                        const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ),
-                ],
-              ),
-        );
-      },
     );
   }
 
-  /// Construit le widget SVG du QR code.
-  Widget _buildQr(BuildContext context, String svg) {
-    return SvgPicture.string(svg);
+  /// Construit le widget
+  Widget _buildQr(BuildContext context, String svg, double size) {
+    return QrImageView(
+      data: payload,
+      errorStateBuilder: (context, e) => error ?? SizedBox.shrink(),
+      padding: EdgeInsets.all(qrImageOptions.margin),
+      embedded: QrEmbeddedImage(
+        image: qrImageOptions.icon?.image != null 
+          ? qrImageOptions.icon!.image!
+          : const AssetImage(icPiSpiQr, package: packageName),
+        style: QrEmbeddedImageStyle(
+          size: Size(
+            qrImageOptions.icon?.size ?? 60, 
+            qrImageOptions.icon?.size ?? 60
+          ),
+        ),
+      ),
+      eyeStyle: QrImageOptionsEye(
+        color: qrImageOptions.eye?.color ?? Colors.black,
+        shape: qrImageOptions.eye?.shape ?? QrEyeShape.square,
+      ),
+      dataModuleStyle: QrImageOptionsData(
+        color: qrImageOptions.data?.color ?? Colors.black,
+        shape: qrImageOptions.data?.shape ?? QrDataShape.circle,
+      ),
+    );
   }
 }

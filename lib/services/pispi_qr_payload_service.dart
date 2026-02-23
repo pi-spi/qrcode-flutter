@@ -1,5 +1,5 @@
 
-import '../models/pispi_qr_contant.dart';
+import '../models/pispi_qr_const.dart';
 import '../models/pispi_qr_country.dart';
 import '../models/pispi_qr_exceptions.dart';
 import '../models/pispi_qr_payload_decode.dart';

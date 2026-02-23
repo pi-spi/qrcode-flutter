@@ -7,3 +7,6 @@
 
 ## 1.0.1
 - Mise à jour des façades a importés
+
+## 1.0.2
+- Mise à jour du widget PispiQrImage pour un qrcode rapide à scanner

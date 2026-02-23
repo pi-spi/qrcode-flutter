@@ -5,7 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:qr/qr.dart';
 
-import '../models/pispi_qr_contant.dart';
+import '../models/pispi_qr_const.dart';
 
 /// PI-SPI QR SVG Generator
 ///
@@ -60,7 +60,7 @@ class PispiQrGenerator {
     /// avec niveau de correction d’erreur M.
     final qrCode = QrCode.fromData(
       data: data,
-      errorCorrectLevel: QrErrorCorrectLevel.M,
+      errorCorrectLevel: QrErrorCorrectLevel.L,
     );
 
     /// Transformation en image matricielle exploitable.
@@ -76,7 +76,7 @@ class PispiQrGenerator {
     final cellSize = drawableSize / moduleCount;
 
     /// Rayon utilisé pour les modules circulaires.
-    final dotRadius = cellSize * 0.44;
+    final dotRadius = cellSize * 0.5;
 
     /// Buffer servant à construire le SVG.
     final buffer = StringBuffer();
