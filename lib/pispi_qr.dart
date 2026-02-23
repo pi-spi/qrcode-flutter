@@ -6,6 +6,7 @@
 /// - Afficher des widgets QR code personnalisables
 ///
 /// Exemple d'utilisation :
+library;
 /*
 import 'package:pispi_qr/pispi_qr.dart';
 
