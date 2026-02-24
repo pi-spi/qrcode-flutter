@@ -81,6 +81,16 @@ flutter pub get
         margin: 10,
     );
 ```
+| Paramètre           | Type     | Défaut  | Description                 |
+| ------------------- | -------- | ------- | --------------------------- |
+| **payload**         | `String` | —       | Payload EMV à encoder       |
+| **size**            | `double` | `200`   | Taille totale du QR         |
+| **piIconSize**      | `double` | `40`    | Taille du logo central      |
+| **backgroundColor** | `Color`  | `white` | Couleur de fond             |
+| **dataColor**       | `Color`  | `black` | Couleur des modules         |
+| **eyeColor**        | `Color`  | `black` | Couleur des finder patterns |
+| **margin**          | `double` | `10`    | Marge externe (quiet zone)  |
+
 Vous pouvez ensuite l'afficher dans un widget SvgPicture
 
 5️⃣ Décoder un payload QR
