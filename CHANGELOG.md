@@ -10,3 +10,6 @@
 
 ## 1.0.2
 - Mise à jour du widget PispiQrImage pour un qrcode rapide à scanner
+
+## 1.0.3
+- Mise à jour du readme
