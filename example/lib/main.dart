@@ -215,6 +215,12 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
         error = e.toString();
         payload = null;
       });
+    } on ArgumentError catch (e){
+
+      setState(() {
+        error = e.toString();
+        payload = null;
+      });
     }
   }
 
