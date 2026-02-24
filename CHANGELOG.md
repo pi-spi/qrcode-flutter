@@ -13,3 +13,6 @@
 
 ## 1.0.3
 - Mise à jour du readme
+
+## 1.0.4
+- Mise à jour du readme

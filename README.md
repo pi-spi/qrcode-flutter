@@ -1,10 +1,10 @@
-# 🏦 BCEAO PI-SPI QR Code Flutter SDK
+# BCEAO PI-SPI QR Code Flutter SDK
 
 Le SDK Flutter `bceao_pispi_qrcode` fournit une interface robuste, sécurisée et conforme aux standards EMV pour intégrer les QR Codes PI-SPI, permettant aux applications mobiles d'interagir avec l'écosystème PI-SPI de la BCEAO.
 
 ---
 
-## ⚡ Fonctionnalités principales
+## Fonctionnalités principales
 
 - Génération de QR Codes **statiques** et **dynamiques**.
 - Construction de payloads **conformes EMV**.
@@ -19,7 +19,7 @@ Ce SDK est conçu pour les applications financières et systèmes de paiement da
 
 ---
 
-## ⚙️ Intégration
+## Intégration
 
 ### 1️⃣ Installation
 
@@ -196,7 +196,7 @@ Configuration du texte affiché sous le QR.
 | **shape** | `QrEyeShape` | `square` ou autre forme supportée |
 
 
-🛡️ Sécurité & Conformité
+Sécurité & Conformité
 
 Payloads conformes EMV.
 Validation CRC16 pour l'intégrité des données.
@@ -204,13 +204,13 @@ Validation d’alias pour correspondance correcte des comptes.
 Gestion des exceptions structurées.
 Seuls les pays et types d'utilisateurs supportés sont autorisés.
 
-👤 Types d'utilisateurs QR
+Types d'utilisateurs QR
 
 individualCustomer – Personne physique (non marchand)
 individualMerchant – Personne physique marchande
 businessEntity – Personne morale / entreprise
 
-📄 Types de QR Code
+Types de QR Code
 
 static – QR Code fixe avec payload statique
 dynamic – QR Code à usage unique par transaction
@@ -224,14 +224,14 @@ PispiQrPayloadDecodeException – Levée lors du décodage d’un payload.
 
 Les codes d’erreur détaillés se trouvent dans PispiQrPayloadDecodeError.
 
-📝 Licence
+Licence
 
 MIT License – libre d’utilisation et de modification, même dans des applications commerciales.
 
-📞 Support
+Support
 
 Pour toute question, problème ou contribution :
 
-Email : support@bceao.int
+Email : pisfn-sandbox@bceao.int
 
 GitHub : [https://github.com/pi-spi/qrcode-flutter.git]
