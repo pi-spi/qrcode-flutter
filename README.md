@@ -29,6 +29,10 @@ Ajoutez le SDK à votre `pubspec.yaml` :
 dependencies:
   bceao_pispi_qrcode: ^1.0.1
 ```
+ou
+```yaml
+$ flutter pub add bceao_pispi_qrcode
+```
 
 Puis récupérez les dépendances :
 
@@ -52,6 +56,18 @@ flutter pub get
         ),
     );
 ```
+### PispiQrPayloadInput
+| Champ               | Type               | Valeurs possibles                                                                                                                            | Contrainte    | Description                          |
+| ------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------ |
+| **qrType**          | `PispiQrType`      | • `static`<br>• `dynamic`                                                                                                                    | ✅ Obligatoire | Type de QR Code à générer            |
+| **qrUser**          | `PispiQrUser`      | • `individualCustomer` — Personne physique<br>• `individualMerchant` — Personne physique commerçante<br>• `businessEntity` — Personne morale | ✅ Obligatoire | Catégorie d’utilisateur PI-SPI       |
+| **alias**           | `String` (UUID v4) | Format UUID v4                                                                                                                               | ✅ Obligatoire | Alias du compte PI-SPI               |
+| **country**         | `PispiQrCountry`   | • `bj` • `bf` • `ci` • `gw`<br>• `ml` • `ne` • `sn` • `tg`                                                                                   | ✅ Obligatoire | Code pays ISO 3166-1 alpha-2         |
+| **merchantChannel** | `String`           | • `731` — Personne physique<br>• `000` — Commerçant / Personne morale<br>• `400` — Personne morale                                           | ✅ Obligatoire | Code canal marchand BCEAO            |
+| **amount**          | `double`           | Valeur numérique                                                                                                                             | ⚪ Optionnel   | Montant de la transaction            |
+| **referenceLabel**  | `String`           | Max. 24 caractères                                                                                                                           | ⚪ Optionnel   | Référence unique de transaction (ID) |
+
+
 
 4️⃣ Générer un QR Code en SVG
 ```dart
@@ -65,7 +81,7 @@ flutter pub get
         margin: 10,
     );
 ```
-// Vous pouvez ensuite l'afficher dans un widget SvgPicture
+Vous pouvez ensuite l'afficher dans un widget SvgPicture
 
 5️⃣ Décoder un payload QR
 ```dart
@@ -74,6 +90,33 @@ print(result.toJson());
 print(result.merchantAccountInformation.accountProxy);
 print(result.transactionAmount);
 ```
+### PispiQrPayloadDecodeResult
+| Champ                          | Type                         | Tag EMV | Obligatoire | Description                                     |
+| ------------------------------ | ---------------------------- | ------- | ----------- | ----------------------------------------------- |
+| **payloadFormatIndicator**     | `String`                     | `00`    | ✅ Oui       | Indicateur de format (toujours `"01"`)         |
+| **merchantAccountInformation** | `MerchantAccountInformation` | `36`    | ✅ Oui       | Informations du compte marchand                 |
+| **merchantCategoryCode**       | `String`                     | `52`    | ✅ Oui       | Code catégoriel marchand (MCC)                  |
+| **transactionCurrency**        | `String`                     | `53`    | ✅ Oui       | Devise de transaction (952 = XOF)               |
+| **transactionAmount**          | `double`                     | `54`    | ⚪ Optionnel | Montant de la transaction (null si QR statique) |
+| **countryCode**                | `String`                     | `58`    | ✅ Oui       | Code pays ISO 3166-1 alpha-2                    |
+| **merchantName**               | `String`                     | `59`    | ✅ Oui       | Nom du marchand (toujours `"X"`)                |
+| **merchantCity**               | `String`                     | `60`    | ✅ Oui       | Ville du marchand (toujours `"X"`)              |
+| **additionalData**             | `AdditionalData`             | `62`    | ✅ Oui       | Données additionnelles                          |
+| **crc**                        | `String`                     | `63`    | ✅ Oui       | Code CRC16 de validation                        |
+
+#### MerchantAccountInformation
+| Champ            | Type     | Sous-Tag | Obligatoire | Description                                |
+| ---------------- | -------- | -------- | ----------- | ------------------------------------------ |
+| **gui**          | `String` | `36.00`  | ✅ Oui       | Global Unique Identifier du système PI-SPI (toujours `"int.bceao.pi"`) |
+| **accountProxy** | `String` | `36.01`  | ✅ Oui       | Alias du compte (UUID v4)                  |
+
+#### AdditionalData
+| Champ               | Type     | Sous-Tag | Obligatoire | Description                     |
+| ------------------- | -------- | -------- | ----------- | ------------------------------- |
+| **merchantChannel** | `String` | `62.11`  | ✅ Oui       | Canal marchand            |
+| **referenceLabel**  | `String` | `62.05`  | ⚪ Optionnel | Référence unique de transaction |
+
+
 
 6️⃣ Valider un alias
 ```dart
@@ -84,7 +127,7 @@ print(result.transactionAmount);
 7️⃣ Afficher un QR Code dans Flutter
 ```dart
     PispiQrImage(
-        payload: payload,
+        payload: payload, // String
         qrImageOptions: QrImageOptions(
             qrSize: 220,
             margin: 12,
@@ -105,6 +148,43 @@ print(result.transactionAmount);
         ),
     );
 ```
+### QrImageOptions
+Configuration de l’icône centrale.
+| Propriété  | Type                   | Défaut        | Description                  |
+| ---------- | ---------------------- | ------------- | ---------------------------- |
+| **qrSize** | `double?`              | Responsive    | Taille personnalisée du QR   |
+| **margin** | `double`               | `10`          | Marge externe (quiet zone)   |
+| **icon**   | `QrImageOptionsIcon?`  | Logo PI-SPI   | Icône centrale               |
+| **data**   | `QrImageOptionsData?`  | Noir / cercle | Style des modules de données |
+| **eye**    | `QrImageOptionsEye?`   | Noir / carré  | Style des finder patterns    |
+| **label**  | `QrImageOptionsLabel?` | `null`        | Texte affiché sous le QR     |
+
+#### QrImageOptionsIcon
+Permet de configurer l’apparence du QR Code.
+| Propriété | Type             | Défaut      | Description         |
+| --------- | ---------------- | ----------- | ------------------- |
+| **image** | `ImageProvider?` | Logo PI-SPI | Image personnalisée |
+| **size**  | `double`         | `60`        | Taille de l’icône   |
+
+#### QrImageOptionsLabel
+Configuration du texte affiché sous le QR.
+| Propriété     | Type         | Description        |
+| ------------- | ------------ | ------------------ |
+| **text**      | `String`     | Texte du label     |
+| **textStyle** | `TextStyle?` | Style personnalisé |
+
+#### Modules de données (data)
+| Propriété | Type          | Description          |
+| --------- | ------------- | -------------------- |
+| **color** | `Color`       | Couleur des modules  |
+| **shape** | `QrDataShape` | `circle` ou `square` |
+
+#### Finder Patterns (eye)
+| Propriété | Type         | Description                       |
+| --------- | ------------ | --------------------------------- |
+| **color** | `Color`      | Couleur des yeux                  |
+| **shape** | `QrEyeShape` | `square` ou autre forme supportée |
+
 
 🛡️ Sécurité & Conformité
 
