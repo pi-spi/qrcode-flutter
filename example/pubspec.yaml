@@ -19,6 +19,7 @@ dependencies:
   
   # Pour lire la valeur d'un qrcode depuis une image et la camera
   mobile_scanner: ^7.0.1
+  flutter_svg: ^2.2.3
   #
   bceao_pispi_qrcode:
     # When depending on this package from a real application you should use:

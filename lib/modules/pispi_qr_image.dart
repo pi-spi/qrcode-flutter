@@ -11,6 +11,8 @@ class QrImageOptions {
   /// Taille personnalisée du QR. Si null, le QR sera responsive.
   final double? qrSize;
 
+  final Color qrBgColor;
+
   /// Marge autour du QR.
   final double margin;
 
@@ -28,6 +30,7 @@ class QrImageOptions {
     this.label,
     this.margin = 10,
     this.qrSize,
+    this.qrBgColor = Colors.transparent,
     this.icon,
     this.data,
     this.eye,
@@ -183,6 +186,7 @@ class PispiQrImage extends StatelessWidget {
       data: payload,
       errorStateBuilder: (context, e) => error ?? SizedBox.shrink(),
       padding: EdgeInsets.all(qrImageOptions.margin),
+      backgroundColor: qrImageOptions.qrBgColor,
       embedded: QrEmbeddedImage(
         image: qrImageOptions.icon?.image != null 
           ? qrImageOptions.icon!.image!

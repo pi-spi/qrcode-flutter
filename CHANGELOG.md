@@ -16,3 +16,6 @@
 
 ## 1.0.4
 - Mise à jour du readme
+
+## 1.0.5
+- Corrections du PispiQrGenerator.svg(data)

@@ -51,7 +51,7 @@ class PispiQrGenerator {
     double margin = 10,
     double size = 200,
     double piIconSize = 40,
-    Color backgroundColor = Colors.white,
+    Color? backgroundColor,
     Color dataColor = Colors.black,
     Color eyeColor = Colors.black,
   }) async {
@@ -76,14 +76,14 @@ class PispiQrGenerator {
     final cellSize = drawableSize / moduleCount;
 
     /// Rayon utilisé pour les modules circulaires.
-    final dotRadius = cellSize * 0.5;
+    final dotRadius = cellSize * 0.4;
 
     /// Buffer servant à construire le SVG.
     final buffer = StringBuffer();
 
     /// Déclaration de l’en-tête SVG.
     buffer.writeln(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="$size" height="$size" shape-rendering="geometricPrecision">'
+      '<svg xmlns="http://www.w3.org/2000/svg" width="$size" height="$size" shape-rendering="crispEdges">'
     );
 
     /// Application du fond si couleur supportée.
@@ -102,49 +102,34 @@ class PispiQrGenerator {
         if (qrImage.isDark(row, col) == true) {
 
           /// Calcul position centrée.
-          final dx = margin + col * cellSize + cellSize / 2;
-          final dy = margin + row * cellSize + cellSize / 2;
+          final x = margin + col * cellSize;
+          final y = margin + row * cellSize;
 
           /// Détection des finder patterns (yeux).
           if (_isFinderPattern(moduleCount, row, col)) {
 
-            final eye = _color(eyeColor);
+            final eye = colorToHex(eyeColor);
 
-            if (eye != null) {
-              buffer.writeln(
-                '<rect x="${dx.toStringAsFixed(2)}" '
-                'y="${dy.toStringAsFixed(2)}" '
-                'width="$cellSize" height="$cellSize" '
-                'fill="$eye" />'
-              );
-            } else {
-              buffer.writeln(
-                '<rect x="${dx.toStringAsFixed(2)}" '
-                'y="${dy.toStringAsFixed(2)}" '
-                'width="$cellSize" height="$cellSize" />'
-              );
-            }
+            buffer.writeln(
+              '<rect x="${x.toStringAsFixed(2)}" y="${y.toStringAsFixed(2)}" '
+              'width="${cellSize.toStringAsFixed(2)}" height="${cellSize.toStringAsFixed(2)}" '
+              'fill="$eye"/>'
+            );
 
           } else {
 
             /// Modules de données rendus en cercle.
-            final dataColorHex = _color(dataColor);
+            final cx = x + cellSize / 2;
+            final cy = y + cellSize / 2;
+            final dataColorHex = colorToHex(dataColor);
 
-            if (dataColorHex != null) {
-              buffer.writeln(
-                '<circle cx="${dx.toStringAsFixed(2)}" '
-                'cy="${dy.toStringAsFixed(2)}" '
-                'r="${dotRadius.toStringAsFixed(2)}" '
-                'fill="$dataColorHex"/>'
-              );
-            } else {
-              buffer.writeln(
-                '<circle cx="${dx.toStringAsFixed(2)}" '
-                'cy="${dy.toStringAsFixed(2)}" '
-                'r="${dotRadius.toStringAsFixed(2)}"/>'
-              );
-            }
+            buffer.writeln(
+              '<circle cx="${cx.toStringAsFixed(2)}" cy="${cy.toStringAsFixed(2)}" '
+              'r="${dotRadius.toStringAsFixed(2)}" '
+              'fill="$dataColorHex"/>'
+            );
           }
+
         }
       }
     }
@@ -187,19 +172,15 @@ class PispiQrGenerator {
   /// - en haut à gauche
   /// - en haut à droite
   /// - en bas à gauche
-  static bool _isFinderPattern(
-      int moduleCount, int row, int col) {
+  static bool _isFinderPattern(int moduleCount, int row, int col) {
 
     const patternSize = 7;
 
-    final inTop = row < patternSize;
-    final inBottom = row >= moduleCount - patternSize;
-    final inLeft = col < patternSize;
-    final inRight = col >= moduleCount - patternSize;
+    final inTopLeft = row < patternSize && col < patternSize;
+    final inTopRight = row < patternSize && col >= moduleCount - patternSize;
+    final inBottomLeft = row >= moduleCount - patternSize && col < patternSize;
 
-    return (inTop && inLeft) ||
-           (inTop && inRight) ||
-           (inBottom && inLeft);
+    return inTopLeft || inTopRight || inBottomLeft;
   }
 
   /// Convertit une couleur Flutter en valeur SVG simple.
@@ -209,7 +190,8 @@ class PispiQrGenerator {
   /// - noir
   ///
   /// Retourne `null` si la couleur n’est pas supportée.
-  static String? _color(Color color) {
+  static String? _color(Color? color) {
+    if(color == null) return null;
 
     if (color == Colors.white ||
         color == const Color(0xFFFFFFFF)) {
@@ -222,5 +204,9 @@ class PispiQrGenerator {
     }
 
     return null;
+  }
+
+  static String colorToHex(Color color) {
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 }

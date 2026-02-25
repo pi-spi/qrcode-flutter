@@ -1,6 +1,6 @@
 name: bceao_pispi_qrcode
 description: "Flutter SDK pour générer et décoder des QR Codes PI-SPI conformes EMV."
-version: 1.0.4
+version: 1.0.5
 homepage: "https://github.com/pi-spi/qrcode-flutter.git"
 repository: "https://github.com/pi-spi/qrcode-flutter.git"
 

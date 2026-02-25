@@ -27,7 +27,7 @@ Ajoutez le SDK à votre `pubspec.yaml` :
 
 ```yaml
 dependencies:
-  bceao_pispi_qrcode: ^1.0.1
+  bceao_pispi_qrcode: ^1.0.5
 ```
 ou
 ```yaml
