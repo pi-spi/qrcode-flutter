@@ -4,6 +4,60 @@ Le SDK Flutter `bceao_pispi_qrcode` fournit une interface robuste, sécurisée e
 
 ---
 
+## Structure du projet
+
+```
+└── 📁bceao_pispi_qrcode
+    └── 📁assets
+        └── 📁images
+            ├── ic_qr.png
+            ├── logo_spi_dark.png
+            ├── logo_spi_light.png
+            ├── logo_spi.png
+    └── 📁example
+        └── 📁assets
+            ├── logo_spi.png
+        └── 📁lib
+            ├── home.dart
+            ├── main.dart
+            ├── pipsi_qr_decoder_page.dart
+            └── pipsi_qr_generator_page.dart
+    └── 📁lib
+        └── 📁models
+            ├── pispi_qr_const.dart
+            ├── pispi_qr_country.dart
+            ├── pispi_qr_exceptions.dart
+            ├── pispi_qr_payload_decode.dart
+            ├── pispi_qr_payload_input.dart
+            ├── pispi_qr_type.dart
+            ├── pispi_qr_user.dart
+        └── 📁modules
+            └── 📁paint
+                ├── errors.dart
+                ├── paint_cache.dart
+                ├── qr_image.dart
+                ├── qr_painter.dart
+                ├── types.dart
+            ├── pispi_qr_generator.dart
+            ├── pispi_qr_image.dart
+            ├── pispi_qr_payload.dart
+        └── 📁services
+            ├── pispi_qr_payload_service.dart
+        ├── pispi_qr_web.dart
+        ├── pispi_qr.dart
+    └── 📁test
+        ├── pispi_qr_payload_service_test.dart
+    ├── .gitignore
+    ├── .metadata
+    ├── analysis_options.yaml
+    ├── bceao_pispi_qrcode.iml
+    ├── CHANGELOG.md
+    ├── LICENSE
+    ├── pubspec.lock
+    ├── pubspec.yaml
+    └── README.md
+```
+
 ## Fonctionnalités principales
 
 - Génération de QR Codes **statiques** et **dynamiques**.
