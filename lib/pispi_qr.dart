@@ -26,7 +26,6 @@ export 'models/pispi_qr_exceptions.dart';
 export 'models/pispi_qr_payload_decode.dart';
 export 'models/pispi_qr_payload_input.dart';
 export 'models/pispi_qr_type.dart';
-export 'models/pispi_qr_user.dart';
 
 // Modules
 export 'modules/paint/types.dart';

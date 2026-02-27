@@ -60,4 +60,9 @@ enum PispiQrCountry {
     return PispiQrCountry.values
         .any((country) => country.code == code);
   }
+
+  static PispiQrCountry get(String code) {
+    return PispiQrCountry.values
+        .firstWhere((country) => country.code == code);
+  }
 }

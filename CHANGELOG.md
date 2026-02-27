@@ -19,3 +19,6 @@
 
 ## 1.0.5
 - Corrections du PispiQrGenerator.svg(data)
+
+## 1.0.6
+- Suppression de la génération de payload qr pour les personnes physiques

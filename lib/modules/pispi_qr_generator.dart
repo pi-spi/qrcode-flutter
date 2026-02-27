@@ -35,10 +35,9 @@ class PispiQrGenerator {
   /// Paramètres optionnels :
   /// - [margin] : Marge externe autour du QR.
   /// - [size] : Taille totale du SVG.
-  /// - [piIconSize] : Taille du logo central.
+  /// - [logoSize] : Taille du logo central.
   /// - [backgroundColor] : Couleur du fond.
-  /// - [dataColor] : Couleur des modules de données.
-  /// - [eyeColor] : Couleur des finder patterns.
+  /// - [dotColor] : Couleur des modules de données.
   ///
   /// Retourne une `String` contenant le SVG complet.
   ///
@@ -50,10 +49,9 @@ class PispiQrGenerator {
     String data, {
     double margin = 10,
     double size = 200,
-    double piIconSize = 40,
+    double logoSize = 40,
     Color? backgroundColor,
-    Color dataColor = Colors.black,
-    Color eyeColor = Colors.black,
+    Color dotColor = Colors.black,
   }) async {
 
     /// Création du QR Code brut conforme ISO/IEC 18004
@@ -105,15 +103,16 @@ class PispiQrGenerator {
           final x = margin + col * cellSize;
           final y = margin + row * cellSize;
 
+          final dotColorHex = colorToHex(dotColor);
+
           /// Détection des finder patterns (yeux).
           if (_isFinderPattern(moduleCount, row, col)) {
 
-            final eye = colorToHex(eyeColor);
 
             buffer.writeln(
               '<rect x="${x.toStringAsFixed(2)}" y="${y.toStringAsFixed(2)}" '
               'width="${cellSize.toStringAsFixed(2)}" height="${cellSize.toStringAsFixed(2)}" '
-              'fill="$eye"/>'
+              'fill="$dotColorHex"/>'
             );
 
           } else {
@@ -121,12 +120,11 @@ class PispiQrGenerator {
             /// Modules de données rendus en cercle.
             final cx = x + cellSize / 2;
             final cy = y + cellSize / 2;
-            final dataColorHex = colorToHex(dataColor);
 
             buffer.writeln(
               '<circle cx="${cx.toStringAsFixed(2)}" cy="${cy.toStringAsFixed(2)}" '
               'r="${dotRadius.toStringAsFixed(2)}" '
-              'fill="$dataColorHex"/>'
+              'fill="$dotColorHex"/>'
             );
           }
 
@@ -135,7 +133,7 @@ class PispiQrGenerator {
     }
 
     /// Intégration du logo central si activé.
-    if (piIconSize > 0) {
+    if (logoSize > 0) {
 
       /// Chargement de l’asset depuis le package.
       final logoBytes =
@@ -149,12 +147,12 @@ class PispiQrGenerator {
           'data:image/png;base64,$logoBase64';
 
       /// Positionnement centré.
-      final x = (size - piIconSize) / 2;
-      final y = (size - piIconSize) / 2;
+      final x = (size - logoSize) / 2;
+      final y = (size - logoSize) / 2;
 
       buffer.writeln(
         '<image x="$x" y="$y" '
-        'width="$piIconSize" height="$piIconSize" '
+        'width="$logoSize" height="$logoSize" '
         'href="$logoDataUrl"/>'
       );
     }

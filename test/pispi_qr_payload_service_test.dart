@@ -9,28 +9,12 @@ void main() {
 
   group("ENCODE - SUCCESS CASES", () {
 
-    test("Individual Customer - Static - Valid", () {
-      final input = PispiQrPayloadInput(
-        qrType: PispiQrType.static,
-        qrUser: PispiQrUser.individualCustomer,
-        alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "731",
-      );
-
-      final payload = service.encode(input);
-
-      expect(payload, isNotEmpty);
-      expect(payload.contains("731"), true);
-    });
 
     test("Individual Merchant - Static - Valid", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.static,
-        qrUser: PispiQrUser.individualMerchant,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "000",
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "REF123",
       );
 
@@ -43,10 +27,8 @@ void main() {
     test("Business Entity - Static - Valid", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.static,
-        qrUser: PispiQrUser.businessEntity,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "000",
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "FACTURE001",
       );
 
@@ -58,10 +40,8 @@ void main() {
     test("Business Entity - Dynamic - Valid", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.dynamic,
-        qrUser: PispiQrUser.businessEntity,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "400",
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "INV2024",
         amount: 100,
       );
@@ -74,14 +54,13 @@ void main() {
 
   group("ENCODE - ERROR CASES", () {
 
-    test("Personne physique dynamic interdit", () {
+    test("Amount invalid", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.dynamic,
-        qrUser: PispiQrUser.individualCustomer,
         alias: validAlias,
-        country: PispiQrCountry.sn,
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "0000000",
-        merchantChannel: "731",
+        amount: 0
       );
 
       expect(
@@ -93,10 +72,8 @@ void main() {
     test("Alias invalide", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.static,
-        qrUser: PispiQrUser.individualCustomer,
         alias: "invalid-alias",
-        country: PispiQrCountry.sn,
-        merchantChannel: "731",
+        countryCode: PispiQrCountry.sn,
       );
 
       expect(
@@ -108,10 +85,8 @@ void main() {
     test("referenceLabel.length > 25", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.dynamic,
-        qrUser: PispiQrUser.businessEntity,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "400",
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "000000000000000000000000000000000000000000000000",
         amount: 10,
       );
@@ -124,11 +99,9 @@ void main() {
 
     test("Business sans referenceLabel", () {
       final input = PispiQrPayloadInput(
-        qrType: PispiQrType.static,
-        qrUser: PispiQrUser.businessEntity,
+        qrType: PispiQrType.dynamic,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "000",
+        countryCode: PispiQrCountry.sn,
       );
 
       expect(
@@ -143,27 +116,24 @@ void main() {
     test("Decode valid payload", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.static,
-        qrUser: PispiQrUser.individualCustomer,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "731",
+        countryCode: PispiQrCountry.sn,
       );
 
       final payload = service.encode(input);
       final result = service.decode(payload);
 
-      expect(result.countryCode, "SN");
-      expect(result.merchantAccountInformation.accountProxy, validAlias);
-      expect(result.additionalData.merchantChannel, "731");
+      expect(result.countryCode, PispiQrCountry.sn);
+      expect(result.alias, validAlias);
+
+      expect(result.merchantChannel, '000');
     });
 
     test("Decode with amount", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.dynamic,
-        qrUser: PispiQrUser.businessEntity,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "400",
+        countryCode: PispiQrCountry.sn,
         referenceLabel: "000000",
         amount: 150,
       );
@@ -171,7 +141,9 @@ void main() {
       final payload = service.encode(input);
       final result = service.decode(payload);
 
-      expect(result.transactionAmount, 150);
+      expect(result.amount, 150);
+
+      expect(result.merchantChannel, '400');
     });
   });
 
@@ -194,10 +166,8 @@ void main() {
     test("CRC invalide", () {
       final input = PispiQrPayloadInput(
         qrType: PispiQrType.static,
-        qrUser: PispiQrUser.individualCustomer,
         alias: validAlias,
-        country: PispiQrCountry.sn,
-        merchantChannel: "731",
+        countryCode: PispiQrCountry.sn,
       );
 
       final payload = service.encode(input);

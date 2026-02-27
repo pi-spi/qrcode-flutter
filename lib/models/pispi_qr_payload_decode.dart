@@ -1,168 +1,75 @@
-/// Représente le résultat d’un décodage réussi
-/// d’un payload QR PI-SPI conforme au standard EMV.
-///
-/// Ce modèle contient l’ensemble des champs EMV extraits
-/// et validés depuis la payload du QR code.
-///
-/// Chaque propriété correspond à un tag EMV spécifique.
+import 'pispi_qr_country.dart';
+import 'pispi_qr_type.dart';
+
 class PispiQrPayloadDecodeResult {
 
-  /// Indicateur de format de la payload (Tag 00).
+  /// Définit le type de QR code à générer.
   ///
-  /// La valeur attendue est généralement "01".
-  final String payloadFormatIndicator;
+  /// - `static`  → QR réutilisable.
+  /// - `dynamic` → QR à usage unique avec référence obligatoire.
+  final PispiQrType qrType;
 
-  /// Informations de compte marchand (Tag 36).
+  /// Alias unique du marchand ou du compte bénéficiaire.
   ///
-  /// Contient :
-  /// - le Global Unique Identifier (GUI),
-  /// - le proxy de compte (alias).
-  final MerchantAccountInformation merchantAccountInformation;
-
-  /// Merchant Category Code (Tag 52).
+  /// Cet identifiant sert au routage de la transaction
+  /// dans l’écosystème PI-SPI.
   ///
-  /// Code catégoriel du marchand selon la classification EMV.
-  final String merchantCategoryCode;
+  /// ⚠️ Ne doit jamais être vide.
+  final String alias;
 
-  /// Devise de transaction (Tag 53).
+  /// Pays d’émission du QR code.
   ///
-  /// Pour l’UEMOA, la valeur attendue est :
-  /// 952 (Franc CFA - XOF).
-  final String transactionCurrency;
+  /// Doit appartenir à la liste des pays supportés
+  /// par le système PI-SPI (UEMOA).
+  final PispiQrCountry countryCode;
 
-  /// Montant de la transaction (Tag 54).
+  /// Montant de la transaction.
   ///
-  /// Peut être nul dans le cas d’un QR statique
-  /// sans montant prédéfini.
-  final double? transactionAmount;
+  /// - Optionnel pour un QR statique.
+  /// - Optionnel pour un QR dynamique selon implémentation.
+  /// - Doit être strictement supérieur à zéro s’il est fourni.
+  final double? amount;
 
-  /// Code pays ISO 3166-1 alpha-2 (Tag 58).
+
+  /// Référence de transaction (Reference Label).
   ///
-  /// Doit correspondre à un pays UEMOA supporté.
-  final String countryCode;
-
-  /// Nom du marchand (Tag 59).
-  final String merchantName;
-
-  /// Ville du marchand (Tag 60).
-  final String merchantCity;
-
-  /// Données additionnelles (Tag 62).
+  /// Utilisée pour :
+  /// - la réconciliation comptable,
+  /// - le suivi transactionnel,
+  /// - l’identification unique d’un paiement dynamique.
   ///
-  /// Inclut notamment :
-  /// - le Reference Label,
-  /// - le canal marchand.
-  final AdditionalData additionalData;
-
-  /// Code de contrôle CRC (Tag 63).
-  ///
-  /// Permet de vérifier l’intégrité de la payload.
-  final String crc;
-
-  PispiQrPayloadDecodeResult({
-    required this.payloadFormatIndicator,
-    required this.merchantAccountInformation,
-    required this.merchantCategoryCode,
-    required this.transactionCurrency,
-    required this.countryCode,
-    required this.merchantName,
-    required this.merchantCity,
-    required this.crc,
-    this.transactionAmount,
-    required this.additionalData,
-  });
-
-  /// Convertit le résultat décodé en représentation JSON.
-  ///
-  /// Les champs optionnels nuls ne sont pas inclus.
-  Map<String, dynamic> toJson() {
-    final data = <String, dynamic>{
-      'payloadFormatIndicator': payloadFormatIndicator,
-      'merchantAccountInformation': merchantAccountInformation.toJson(),
-      'merchantCategoryCode': merchantCategoryCode,
-      'transactionCurrency': transactionCurrency,
-      'countryCode': countryCode,
-      'merchantName': merchantName,
-      'merchantCity': merchantCity,
-      'additionalData': additionalData.toJson(),
-      'crc': crc,
-    };
-
-    if (transactionAmount != null) {
-      data['transactionAmount'] = transactionAmount;
-    }
-
-    return data;
-  }
-}
-
-/// Représente les informations de compte marchand (Tag 36).
-///
-/// Ce segment EMV encapsule des sous-tags :
-/// - 36.00 : Global Unique Identifier (GUI)
-/// - 36.01 : Proxy de compte (alias)
-class MerchantAccountInformation {
-
-  /// Global Unique Identifier (Tag 36.00).
-  ///
-  /// Identifiant unique du système PI-SPI.
-  final String gui;
-
-  /// Proxy de compte (Tag 36.01).
-  ///
-  /// Correspond généralement à l’alias (UUID v4).
-  final String accountProxy;
-
-  MerchantAccountInformation({
-    required this.gui,
-    required this.accountProxy,
-  });
-
-  /// Convertit les informations marchand en JSON.
-  Map<String, dynamic> toJson() {
-    return {
-      'gui': gui,
-      'accountProxy': accountProxy,
-    };
-  }
-}
-
-/// Représente le modèle des Données Additionnelles (Tag 62).
-///
-/// Ce segment peut contenir plusieurs sous-tags,
-/// dont les plus importants pour PI-SPI :
-///
-/// - 62.05 : Reference Label
-/// - 62.11 : Merchant Channel
-class AdditionalData {
-
-  /// Reference Label optionnel (Tag 62.05).
-  ///
-  /// Généralement obligatoire pour les QR dynamiques.
+  /// - Optionnelle pour QR statique.
+  /// - Obligatoire pour QR dynamique.
   final String? referenceLabel;
 
-  /// Identifiant du canal marchand (Tag 62.11).
-  ///
-  /// Exemple :
-  /// - "000" → QR statique
-  /// - "400" → QR dynamique
   final String merchantChannel;
 
-  AdditionalData({
-    this.referenceLabel,
+  /// Crée une nouvelle instance de [PispiQrPayloadDecodeResult].
+  ///
+  /// Une validation automatique est exécutée lors de l’instanciation.
+  ///
+  PispiQrPayloadDecodeResult({
+    required this.qrType,
+    required this.alias,
+    required this.countryCode,
     required this.merchantChannel,
+    this.amount,
+    this.referenceLabel,
   });
 
-  /// Convertit les données additionnelles en JSON.
-  ///
-  /// Les champs nuls ne sont pas inclus.
+
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{
-      'merchantChannel': merchantChannel,
+      'qrType': qrType.name,
+      'alias': alias,
+      'merchantChannel': merchantChannel
     };
 
     if (referenceLabel != null) {
       data['referenceLabel'] = referenceLabel;
+    }
+    if (amount != null) {
+      data['amount'] = amount;
     }
 
     return data;

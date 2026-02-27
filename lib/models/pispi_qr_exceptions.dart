@@ -147,4 +147,7 @@ enum PispiQrPayloadDecodeError {
 
   /// Reference label invalide (Tag 62.05).
   invalidReferenceLabel,
+
+  /// Marchant channel invalide (Tag 62.11).
+  invalidMarchantChannel
 }

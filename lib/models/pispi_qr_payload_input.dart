@@ -1,6 +1,6 @@
 import 'pispi_qr_country.dart';
+import 'pispi_qr_exceptions.dart';
 import 'pispi_qr_type.dart';
-import 'pispi_qr_user.dart';
 
 /// Représente les données d’entrée nécessaires
 /// à la génération d’une payload QR PI-SPI conforme EMV.
@@ -28,14 +28,6 @@ class PispiQrPayloadInput {
   /// - `dynamic` → QR à usage unique avec référence obligatoire.
   final PispiQrType qrType;
 
-  /// Indique la catégorie d’utilisateur du QR.
-  ///
-  /// Permet d’appliquer les règles métier appropriées :
-  /// - particulier,
-  /// - commerçant individuel,
-  /// - personne morale.
-  final PispiQrUser qrUser;
-
   /// Alias unique du marchand ou du compte bénéficiaire.
   ///
   /// Cet identifiant sert au routage de la transaction
@@ -48,7 +40,7 @@ class PispiQrPayloadInput {
   ///
   /// Doit appartenir à la liste des pays supportés
   /// par le système PI-SPI (UEMOA).
-  final PispiQrCountry country;
+  final PispiQrCountry countryCode;
 
   /// Montant de la transaction.
   ///
@@ -57,15 +49,6 @@ class PispiQrPayloadInput {
   /// - Doit être strictement supérieur à zéro s’il est fourni.
   final double? amount;
 
-  /// Identifiant du canal marchand.
-  ///
-  /// Exemples :
-  /// - '731' → QR statique pour particulier
-  /// - '000' → QR statique pour commerçant ou entreprise
-  /// - '400' → QR dynamique entreprise
-  ///
-  /// Ce champ influence la valeur du Merchant Channel (Tag 62.11).
-  final String merchantChannel;
 
   /// Référence de transaction (Reference Label).
   ///
@@ -85,15 +68,11 @@ class PispiQrPayloadInput {
   /// Lève une [ArgumentError] si les données sont invalides.
   PispiQrPayloadInput({
     required this.qrType,
-    required this.qrUser,
     required this.alias,
-    required this.country,
+    required this.countryCode,
     this.amount,
-    required this.merchantChannel,
     this.referenceLabel,
-  }) {
-    _validate();
-  }
+  });
 
   /// Valide l’intégrité et la cohérence des données d’entrée.
   ///
@@ -102,23 +81,35 @@ class PispiQrPayloadInput {
   /// - Merchant Channel non vide.
   /// - Montant strictement positif si fourni.
   /// - Reference Label obligatoire pour un QR dynamique.
-  void _validate() {
+  void validate() {
     if (alias.trim().isEmpty) {
-      throw ArgumentError('Alias ne peut pas être vide.');
-    }
-
-    if (merchantChannel.trim().isEmpty) {
-      throw ArgumentError('Le Merchant Channel ne peut pas être vide.');
+      throw PispiQrPayloadInputException('Alias ne peut pas être vide.');
     }
 
     if (amount != null && amount! <= 0) {
-      throw ArgumentError('Le montant doit être strictement supérieur à zéro.');
+      throw PispiQrPayloadInputException('Le montant doit être strictement supérieur à zéro.');
     }
 
     if (qrType == PispiQrType.dynamic && referenceLabel == null) {
-      throw ArgumentError(
+      throw PispiQrPayloadInputException(
         'Le Reference Label est obligatoire pour un QR dynamique.',
       );
     }
+  }
+
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{
+      'qrType': qrType.name,
+      'alias': alias
+    };
+
+    if (referenceLabel != null) {
+      data['referenceLabel'] = referenceLabel;
+    }
+    if (amount != null) {
+      data['amount'] = amount;
+    }
+
+    return data;
   }
 }

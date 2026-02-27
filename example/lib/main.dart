@@ -145,7 +145,7 @@ class PispiQrGenerationPage extends StatefulWidget {
 }
 
 class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
-  final channels = ['731','000','400'];
+
   final defaultAlias = '111c3e1b-4312-49ec-b75e-4c8c74c10fd7';
   final _formKey = GlobalKey<FormState>();
 
@@ -153,10 +153,8 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
   late TextEditingController amountController;
   late TextEditingController referenceController;
 
-  late PispiQrUser qrUser;
   late PispiQrType qrType;
   late PispiQrCountry country;
-  late String channel;
 
   String? payload;
   String? error;
@@ -166,10 +164,8 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
   @override
   void initState() {
     super.initState();
-    qrUser = PispiQrUser.individualCustomer;
     qrType = PispiQrType.static;
     country = PispiQrCountry.ci;
-    channel = channels.first;
     aliasController = TextEditingController(text: defaultAlias);
     amountController = TextEditingController();
     referenceController = TextEditingController();
@@ -179,10 +175,8 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
     setState(() {
       payload = null;
       error = null;
-      qrUser = PispiQrUser.individualCustomer;
       qrType = PispiQrType.static;
       country = PispiQrCountry.ci;
-      channel = channels.first;
       amountController.clear();
       referenceController.clear();
       aliasController.text = defaultAlias;
@@ -195,13 +189,11 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
     try {
       final input = PispiQrPayloadInput(
         qrType: qrType,
-        qrUser: qrUser,
         alias: aliasController.text.trim(),
-        country: country,
+        countryCode: country,
         amount: amountController.text.isEmpty
             ? null
             : double.tryParse(amountController.text),
-        merchantChannel: channel,
         referenceLabel: referenceController.text.isEmpty
             ? null
             : referenceController.text.trim(),
@@ -341,19 +333,6 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      /// Dropdown QR User
-                      DropdownButtonFormField<PispiQrUser>(
-                        initialValue: qrUser,
-                        decoration: inputStyle("QR User"),
-                        items: PispiQrUser.values
-                            .map((e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Text(_qrUserName(e),style: TextStyle(fontSize: 14),),
-                                ))
-                            .toList(),
-                        onChanged: (v) => setState(() => qrUser = v!),
-                      ),
-                      const SizedBox(height: 15),
 
                       /// Dropdown QR Type
                       DropdownButtonFormField<PispiQrType>(
@@ -389,20 +368,6 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
                         decoration: inputStyle("Alias (UUID v4)"),
                         validator: (v) =>
                             v == null || v.isEmpty ? "Alias obligatoire" : null,
-                      ),
-                      const SizedBox(height: 15),
-
-                      /// Merchant Channel
-                      DropdownButtonFormField<String>(
-                        initialValue: channel,
-                        decoration: inputStyle("Merchant Channel"),
-                        items: channels
-                            .map((e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Text(e, style: TextStyle(fontSize: 14),),
-                                ))
-                            .toList(),
-                        onChanged: (v) => setState(() => channel = v!),
                       ),
                       const SizedBox(height: 15),
 
@@ -467,14 +432,6 @@ class _PispiQrGenerationPageState extends State<PispiQrGenerationPage> {
     switch(type){
       case PispiQrType.static: return "Qr Code statique";
       case PispiQrType.dynamic: return "Qr Code dynamique";
-    }
-  }
-
-  String _qrUserName(PispiQrUser user){
-    switch(user){
-      case PispiQrUser.individualCustomer: return "Personne physique";
-      case PispiQrUser.individualMerchant: return "Personne physique commerçante";
-      case PispiQrUser.businessEntity: return "Personne morale";
     }
   }
 
@@ -691,12 +648,12 @@ class _PispiQrDecoderPageState extends State<PispiQrDecoderPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _field("Alias", r.merchantAccountInformation.accountProxy),
-          _field("Pays", r.countryCode),
-          _field("Montant", r.transactionAmount?.toString() ?? "-"),
-          _field("Reference Label", r.additionalData.referenceLabel ?? '-'),
-          _field("Merchant Channel", r.additionalData.merchantChannel),
-          _field("CRC", r.crc),
+          _field("Qr type", r.qrType.name.toUpperCase()),
+          _field("Canal", r.merchantChannel),
+          _field("Alias", r.alias),
+          _field("Pays", r.countryCode.code),
+          _field("Montant", r.amount?.toString() ?? "-"),
+          _field("Reference Label", r.referenceLabel ?? '-'),
         ],
       ),
     );

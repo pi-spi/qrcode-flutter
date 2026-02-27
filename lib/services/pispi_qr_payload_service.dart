@@ -5,14 +5,10 @@ import '../models/pispi_qr_exceptions.dart';
 import '../models/pispi_qr_payload_decode.dart';
 import '../models/pispi_qr_payload_input.dart';
 import '../models/pispi_qr_type.dart';
-import '../models/pispi_qr_user.dart';
 
 class PispiQrPayloadService {
 
   String encode(PispiQrPayloadInput input) {
-    if([PispiQrUser.individualCustomer, PispiQrUser.individualMerchant].contains(input.qrUser) && input.qrType != PispiQrType.static){
-      throw PispiQrPayloadInputException("Vous ne pouvez pas créer de qrcode dynamique pour les personnes physiques");
-    }
 
     if(!isValidAlias(input.alias)){
       throw PispiQrPayloadInputException("L'alias doit être un UUID v4 valide");
@@ -40,49 +36,31 @@ class PispiQrPayloadService {
       segments.add(_formatDataObject('54', input.amount!.toInt().toString())); //Transaction amount
     }
 
-    segments.add(_formatDataObject('58', input.country.code)); // Country Code
+    segments.add(_formatDataObject('58', input.countryCode.code)); // Country Code
     segments.add(_formatDataObject('59', defaultPispiQrMerchantName)); // Marchant Name
     segments.add(_formatDataObject('60', defaultPispiQrMerchantCity)); // Marchant city
 
     // Additional Data Field Template
     var additionalData = [];
-    if(input.qrUser == PispiQrUser.individualCustomer){
-      if(input.referenceLabel != null && input.referenceLabel!.isNotEmpty){
-        throw PispiQrPayloadInputException("Vous n'avez pas besoin de [referenceLabel] pour les personnes physiques");
-      }
-      else if(input.merchantChannel != '731'){
-        throw PispiQrPayloadInputException("La valeur du [merchantChannel] doit être 731 pour les personnes physiques");
-      }
-      additionalData.add(_formatDataObject('11', input.merchantChannel));
-    }
-    else if(input.qrUser == PispiQrUser.individualMerchant){
-      if(input.referenceLabel != null && input.referenceLabel!.isNotEmpty){
-        if(input.referenceLabel!.length > 25){
-          throw PispiQrPayloadInputException("La valeur du [referenceLabel] ne doit pas dépasser 25 caractères");
-        }
-        additionalData.add(_formatDataObject('05', input.referenceLabel!));
-      }
-      if(input.merchantChannel != '000'){
-        throw PispiQrPayloadInputException("La valeur du [merchantChannel] doit être 000 pour une personne physique commerçante");
-      }
-      additionalData.add(_formatDataObject('11', input.merchantChannel));
-    }
-    else if(input.qrUser == PispiQrUser.businessEntity){
+    if(input.qrType == PispiQrType.dynamic){
       if(input.referenceLabel == null || input.referenceLabel!.isEmpty){
-        throw PispiQrPayloadInputException("La valeur du [referenceLabel] est obligatoire pour une personne morale");
+        throw PispiQrPayloadInputException("La valeur du [referenceLabel] est obligatoire pour le qrcode dynamique");
       }
       if(!_isValidReferenceLabel(input.referenceLabel!)){
         throw PispiQrPayloadInputException("La valeur du [referenceLabel] ne doit pas dépasser 25 caractères");
       }
-      if(input.qrType == PispiQrType.static && input.merchantChannel != '000'){
-        throw PispiQrPayloadInputException("La valeur du [merchantChannel] doit être 000 pour un qrcode static appartenant à personne morale");
-      }
-      if(input.qrType == PispiQrType.dynamic && input.merchantChannel != '400'){
-        throw PispiQrPayloadInputException("La valeur du [merchantChannel] doit être 400 pour un qrcode dynamic appartenant à personne morale");
-      }
       additionalData.add(_formatDataObject('05', input.referenceLabel!));
-      additionalData.add(_formatDataObject('11', input.merchantChannel));
     }
+    else {
+      if(input.referenceLabel != null && input.referenceLabel!.isNotEmpty){
+        if(!_isValidReferenceLabel(input.referenceLabel!)){
+          throw PispiQrPayloadInputException("La valeur du [referenceLabel] ne doit pas dépasser 25 caractères");
+        }
+        additionalData.add(_formatDataObject('05', input.referenceLabel!));
+      }
+    }
+
+    additionalData.add(_formatDataObject('11', input.qrType == PispiQrType.static ? '000' : '400'));
 
     if (additionalData.isNotEmpty) {
       segments.add(_formatDataObject('62', additionalData.join()));
@@ -210,27 +188,21 @@ class PispiQrPayloadService {
       throw PispiQrPayloadDecodeException("Merchant City invalide", error: PispiQrPayloadDecodeError.invalidMerchantCity);
     }
 
+    if (!_isValidMarchantChannel(merchantChannel)) {
+      throw PispiQrPayloadDecodeException("Marchant Channel invalide", error: PispiQrPayloadDecodeError.invalidMarchantChannel);
+    }
+
     if (referenceLabel != null && !_isValidReferenceLabel(referenceLabel)) {
       throw PispiQrPayloadDecodeException("Reference Label invalide", error: PispiQrPayloadDecodeError.invalidReferenceLabel);
     }
 
     return PispiQrPayloadDecodeResult(
-      payloadFormatIndicator: payloadFormatIndicator,
-      merchantAccountInformation: MerchantAccountInformation(
-        gui: gui,
-        accountProxy: accountProxy
-      ),
-      merchantCategoryCode: merchantCategoryCode,
-      transactionCurrency: transactionCurrency,
-      transactionAmount: transactionAmount != null ? double.parse(transactionAmount) : null,
-      countryCode: countryCode,
-      merchantName: merchantName,
-      merchantCity: merchantCity,
-      additionalData: AdditionalData(
-        referenceLabel: referenceLabel,
-        merchantChannel: merchantChannel
-      ) ,
-      crc: extractedCrc,
+      qrType: merchantChannel == '000' ? PispiQrType.static : PispiQrType.dynamic,
+      alias: accountProxy,
+      merchantChannel: merchantChannel,
+      amount: transactionAmount != null ? double.parse(transactionAmount) : null,
+      countryCode: PispiQrCountry.get(countryCode),
+      referenceLabel: referenceLabel,
     );
   }
 
@@ -313,5 +285,9 @@ class PispiQrPayloadService {
 
   bool _isValidReferenceLabel(String referenceLabel) {
     return referenceLabel.isNotEmpty && referenceLabel.length < 25;
+  }
+
+  bool _isValidMarchantChannel(String merchantChannel) {
+    return ['000','400'].contains(merchantChannel);
   }
 }
