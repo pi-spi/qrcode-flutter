@@ -22,3 +22,6 @@
 
 ## 1.0.6
 - Suppression de la génération de payload qr pour les personnes physiques
+
+## 1.0.7
+- Possibilité de décoder un qrcode pour les personnes physiques

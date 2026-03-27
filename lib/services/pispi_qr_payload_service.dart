@@ -188,7 +188,7 @@ class PispiQrPayloadService {
       throw PispiQrPayloadDecodeException("Merchant City invalide", error: PispiQrPayloadDecodeError.invalidMerchantCity);
     }
 
-    if (!_isValidMarchantChannel(merchantChannel)) {
+    if (_isValidMarchantChannel(merchantChannel)) {
       throw PispiQrPayloadDecodeException("Marchant Channel invalide", error: PispiQrPayloadDecodeError.invalidMarchantChannel);
     }
 
@@ -197,7 +197,7 @@ class PispiQrPayloadService {
     }
 
     return PispiQrPayloadDecodeResult(
-      qrType: merchantChannel == '000' ? PispiQrType.static : PispiQrType.dynamic,
+      qrType: merchantChannel == '400' ? PispiQrType.dynamic : PispiQrType.static,
       alias: accountProxy,
       merchantChannel: merchantChannel,
       amount: transactionAmount != null ? double.parse(transactionAmount) : null,
@@ -288,6 +288,6 @@ class PispiQrPayloadService {
   }
 
   bool _isValidMarchantChannel(String merchantChannel) {
-    return ['000','400'].contains(merchantChannel);
+    return ['000','400','731'].contains(merchantChannel);
   }
 }
