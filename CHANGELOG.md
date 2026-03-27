@@ -25,3 +25,6 @@
 
 ## 1.0.7
 - Possibilité de décoder un qrcode pour les personnes physiques
+
+## 1.0.8
+- Possibilité de décoder un qrcode pour les personnes physiques
